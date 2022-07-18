@@ -10,7 +10,9 @@ import json
 def mk_copyright_list(dic):
     copyright_list = []
     for copyright_dict in dic['copyrights']:
-        if 'copyright' in copyright_dict:
+        if 'value' in copyright_dict:
+            copyright_list.append(copyright_dict['value'])
+        elif 'copyright' in copyright_dict:
             copyright_list.append(copyright_dict['copyright'])
     return copyright_list
 
