@@ -10,7 +10,9 @@ import json
 def mk_copyright_list(dic):
     copyright_list = []
     for copyright_dict in dic['copyrights']:
-        if 'copyright' in copyright_dict:
+        if 'value' in copyright_dict:
+            copyright_list.append(copyright_dict['value'])
+        elif 'copyright' in copyright_dict:
             copyright_list.append(copyright_dict['copyright'])
     return copyright_list
 
@@ -50,7 +52,7 @@ def report_differences(old_dict, new_dict):
         if new['copyrights'] != old['copyrights']:
             print(f"WARN: {fname} Copyright has changed from " \
                   f"{old['copyrights']} to {new['copyrights']}")
-        elif new['license_expressions'] != old['license_expressions']:
+        if new['license_expressions'] != old['license_expressions']:
             print(f"WARN: {fname} License Expression has changed from " \
                   f"{old['license_expressions']} to {new['license_expressions']}")
 
