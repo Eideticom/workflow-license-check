@@ -5,6 +5,10 @@
 
 import argparse
 import json
+import subprocess
+import shlex
+from pathlib import Path
+import tempfile
 
 
 def mk_copyright_list(dic):
@@ -16,6 +20,11 @@ def mk_copyright_list(dic):
             copyright_list.append(copyright_dict['copyright'])
     return copyright_list
 
+def strip_directory(directory):
+    p = Path(directory)
+    parts = p.parts[1:]
+    return Path(*parts)
+
 def create_cl_dict(json_file):
     with open(json_file, 'r') as f:
         data = json.load(f)
@@ -26,8 +35,8 @@ def create_cl_dict(json_file):
             tmp_dict['file_type']           = dic['file_type']
             tmp_dict['license_expressions'] = dic['license_expressions']
             tmp_dict['copyrights']          = mk_copyright_list(dic)
-
-            final_dict[dic['path']] = tmp_dict
+            fpath = strip_directory(dic['path'])
+            final_dict[fpath] = tmp_dict
     return final_dict
 
 def report_differences(old_dict, new_dict):
@@ -58,15 +67,26 @@ def report_differences(old_dict, new_dict):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Create a new license json file based upon scancode json" \
-                    " results.")
-    parser.add_argument("-b", "--bjson", required=True, \
-                        help="The scancode baseline json file.")
-    parser.add_argument("-n", "--njson", required=True, \
-                        help="The scancode new json file.")
+        description="Create a new license json file based upon scancode \
+                        directory results.")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-d", "--dirs", action="store_true")
+    group.add_argument("-j", "--jsons", action="store_true")
+    parser.add_argument("before")
+    parser.add_argument("after")
     args = parser.parse_args()
 
-    old_dict = create_cl_dict(args.bjson)
-    new_dict = create_cl_dict(args.njson)
+    if args.dirs:
+        with tempfile.NamedTemporaryFile() as tmp_base:
+            subprocess.run(shlex.split(f"scancode -cli --json {tmp_base.name} \
+                           {args.before}"), stderr=subprocess.STDOUT)
+            old_dict = create_cl_dict(tmp_base.name)
+        with tempfile.NamedTemporaryFile() as tmp_new:
+            subprocess.run(shlex.split(f"scancode -cli --json {tmp_new.name} \
+                           {args.after}"), stderr=subprocess.STDOUT)
+            new_dict = create_cl_dict(tmp_new.name)
+    elif args.jsons:
+        old_dict = create_cl_dict(args.before)
+        new_dict = create_cl_dict(args.after)
 
     report_differences(old_dict, new_dict)

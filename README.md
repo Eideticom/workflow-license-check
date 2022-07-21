@@ -3,7 +3,14 @@ Workflow-license-check will allow you to review any project files to check for
 license expressions and copyrights. The project file review can be performed
 using the spdx_review.py file.
 
-# Basic Use Case: Reporting SPDX License or Copyright Changes
+# Use Case 1: Reporting SPDX License or Copyright Changes on Project Directories
+- Download and install ScanCode-Toolkit
+- Have a project directory which is considered the base (untouched)
+- Have another project directory in another location where you have made your changes
+- Use the spdx_review.py script (which will scan both base and new project directories)
+- This will report the license and/or copyright differences between the directories
+
+# Use Case 2: Reporting SPDX License or Copyright Changes on existing Scancode JSON
 - Download and install ScanCode-Toolkit
 - Use the ScanCode-Toolkit on the project folder to produce a json output file
 - Store this json output file as your baseline json
@@ -28,6 +35,7 @@ $ sudo pip install scancode-toolkit
 # Basic scancode usage test after installed with pip
 $ scancode --help
 ```
+
 # How to Perform ScanCode to Create a JSON File
 Choose a destination file or folder that contains your project you want to scan.
 
@@ -39,18 +47,17 @@ Example to create a new json file after there are changes to the files:
 ```
 $ scancode -cli --json new_project.json /home/project_files/
 ```
+
 # How to Report License/Copyright Differences using spdx_review.py
-Requires you to have a baseline json and a new json file for the comparison.
+Requires you to have a base project directory and a new project directory for the comparison.
+Alternatively, you can use two existing scancode json files for comparison.
 
 Example:
 ```
-...
-usage: spdx_review.py [-h] -b BJSON -n NJSON
-spdx_review.py: error: the following arguments are required: -b/--bjson, -n/--njson
-```
-Run the python script using the two json files as arguments:
-```
-$ python3 spdx_review.py -b baseline_project.json -n new_project.json
+# When you are comparing two project directories
+$ python3 spdx_review.py -d base_project_dir new_project_dir
+# When you have two existing scancode json files
+$ python3 spdx_review.py -j basedir.json newdir.json
 ```
 This will produce stdout messages reporting any differences with licenses or
 copyrights. It will also report when a new file has been added along with those
@@ -97,4 +104,3 @@ WARN: Diff in file: old_files/none_to_added_cr.sh field: copyrights old: [] new:
 # An existing file is renamed
 WARN: Diff in file: old_files/no_lic_no_cr.c field: file_name old: old_files/no_lic_no_cr.c new: old_files/new_file_w_cr.h
 ```
-
