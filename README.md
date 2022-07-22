@@ -21,6 +21,12 @@ using the spdx_review.py file.
 - Use the spdx_review.py script on both baseline and new json files
 - This will report the license and/or copyright differences
 
+# Use Case 3: Reporting using GIT branches/hashes
+- Download and install ScanCode-Toolkit
+- Have a project directory
+- Use the spdx_review.py script providing before and after branch/hash values
+- This will report the license and/or copyright differences between the directories
+
 # Prerequisites
 1. Python 3.6 or higher
 2. Download the ScanCode-Toolkit from github:
@@ -51,6 +57,8 @@ $ scancode -cli --json new_project.json /home/project_files/
 # How to Report License/Copyright Differences using spdx_review.py
 Requires you to have a base project directory and a new project directory for the comparison.
 Alternatively, you can use two existing scancode json files for comparison.
+You can also have a base project directory and supply a before and after branch
+or hash for comparison (where after is typically master/main branch).
 
 Example:
 ```
@@ -58,6 +66,8 @@ Example:
 $ python3 spdx_review.py -d base_project_dir new_project_dir
 # When you have two existing scancode json files
 $ python3 spdx_review.py -j basedir.json newdir.json
+# When you have two branches for a project
+$ python3 spdx_review.py -g -G libnoload6 before_branch master_branch
 ```
 This will produce stdout messages reporting any differences with licenses or
 copyrights. It will also report when a new file has been added along with those
