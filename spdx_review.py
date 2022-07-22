@@ -70,6 +70,13 @@ def run_scancode(directory):
                               directory], stderr=subprocess.STDOUT)
         return create_cl_dict(tmp_base.name)
 
+def scancode_git_dir(git_hash, git_dir=None):
+    with tempfile.TemporaryDirectory() as tmp_scandir:
+            subprocess.check_call(f"git archive '{git_hash}' | " +
+                                  f"tar -x -C '{tmp_scandir}'",
+                                  shell=True, cwd=git_dir)
+            return run_scancode(tmp_scandir)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Create a new license json file based upon scancode \
@@ -77,6 +84,8 @@ if __name__ == "__main__":
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--dirs", action="store_true")
     group.add_argument("-j", "--jsons", action="store_true")
+    group.add_argument("-g", "--git", action="store_true")
+    parser.add_argument("-G", "--git_dir", type=Path)
     parser.add_argument("before")
     parser.add_argument("after")
     args = parser.parse_args()
@@ -88,9 +97,11 @@ if __name__ == "__main__":
         elif args.jsons:
             old_dict = create_cl_dict(args.before)
             new_dict = create_cl_dict(args.after)
+        elif args.git:
+            old_dict = scancode_git_dir(args.before, args.git_dir)
+            new_dict = scancode_git_dir(args.after, args.git_dir)
 
         report_differences(old_dict, new_dict)
     except (subprocess.SubprocessError, 
             FileNotFoundError) as e:
         print(e)
-
