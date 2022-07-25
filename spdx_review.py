@@ -41,28 +41,21 @@ def create_cl_dict(json_file):
 def report_differences(old_dict, new_dict):
     for fname, new in new_dict.items():
         if fname not in old_dict:
-            print(f"INFO: New file: {fname} detected." \
-                " Checking now for license expressions and copyrights")
+            print(f"INFO: New file: {fname} detected. Checking now for license expressions and copyrights")
             if not new['license_expressions']:
-                print(f"WARN: New file {fname} is showing no" \
-                      f" license_expressions: {new['license_expressions']}")
+                print(f"WARN: New file {fname} is showing no license_expressions: {new['license_expressions']}")
             else:
-                print(f"INFO: New file {fname} is showing" \
-                      f" license_expressions: {new['license_expressions']}")
+                print(f"INFO: New file {fname} is showing license_expressions: {new['license_expressions']}")
             if not new['copyrights']:
-                print(f"WARN: New file {fname} is showing no" \
-                      f" copyrights: {new['copyrights']}")
+                print(f"WARN: New file {fname} is showing no copyrights: {new['copyrights']}")
             else:
-                print(f"INFO: New file {fname} is showing" \
-                      f" copyrights: {new['copyrights']}")
+                print(f"INFO: New file {fname} is showing copyrights: {new['copyrights']}")
             continue
         old = old_dict[fname]
         if new['copyrights'] != old['copyrights']:
-            print(f"WARN: {fname} Copyright has changed from " \
-                  f"{old['copyrights']} to {new['copyrights']}")
+            print(f"WARN: {fname} Copyright has changed from {old['copyrights']} to {new['copyrights']}")
         if new['license_expressions'] != old['license_expressions']:
-            print(f"WARN: {fname} License Expression has changed from " \
-                  f"{old['license_expressions']} to {new['license_expressions']}")
+            print(f"WARN: {fname} License Expression has changed from {old['license_expressions']} to {new['license_expressions']}")
 
 def run_scancode(directory):
     with tempfile.NamedTemporaryFile() as tmp_base:
@@ -79,8 +72,7 @@ def scancode_git_dir(git_hash, git_dir=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Create a new license json file based upon scancode \
-                        directory results.")
+        description="Create a new license json file based upon scancode directory results")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--dirs", action="store_true")
     group.add_argument("-j", "--jsons", action="store_true")
