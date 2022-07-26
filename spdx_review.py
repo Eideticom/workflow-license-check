@@ -65,6 +65,12 @@ def report_differences(old_dict, new_dict):
             print(f"WARN: {fname} License Expression has changed from " \
                   f"{old['license_expressions']} to {new['license_expressions']}")
 
+def run_scancode(directory):
+    with tempfile.NamedTemporaryFile() as tmp_base:
+        subprocess.run(shlex.split(f"scancode -cli --json {tmp_base.name} \
+                       {directory}"), stderr=subprocess.STDOUT)
+        return create_cl_dict(tmp_base.name)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Create a new license json file based upon scancode \
@@ -77,14 +83,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.dirs:
-        with tempfile.NamedTemporaryFile() as tmp_base:
-            subprocess.run(shlex.split(f"scancode -cli --json {tmp_base.name} \
-                           {args.before}"), stderr=subprocess.STDOUT)
-            old_dict = create_cl_dict(tmp_base.name)
-        with tempfile.NamedTemporaryFile() as tmp_new:
-            subprocess.run(shlex.split(f"scancode -cli --json {tmp_new.name} \
-                           {args.after}"), stderr=subprocess.STDOUT)
-            new_dict = create_cl_dict(tmp_new.name)
+        old_dict = run_scancode(args.before)
+        new_dict = run_scancode(args.after)
     elif args.jsons:
         old_dict = create_cl_dict(args.before)
         new_dict = create_cl_dict(args.after)
