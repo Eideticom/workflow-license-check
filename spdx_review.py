@@ -6,7 +6,6 @@
 import argparse
 import json
 import subprocess
-import shlex
 from pathlib import Path
 import tempfile
 
@@ -42,51 +41,59 @@ def create_cl_dict(json_file):
 def report_differences(old_dict, new_dict):
     for fname, new in new_dict.items():
         if fname not in old_dict:
-            print(f"INFO: New file: {fname} detected." \
-                " Checking now for license expressions and copyrights")
+            print(f"INFO: New file: {fname} detected. Checking now for license expressions and copyrights")
             if not new['license_expressions']:
-                print(f"WARN: New file {fname} is showing no" \
-                      f" license_expressions: {new['license_expressions']}")
+                print(f"WARN: New file {fname} is showing no license_expressions: {new['license_expressions']}")
             else:
-                print(f"INFO: New file {fname} is showing" \
-                      f" license_expressions: {new['license_expressions']}")
+                print(f"INFO: New file {fname} is showing license_expressions: {new['license_expressions']}")
             if not new['copyrights']:
-                print(f"WARN: New file {fname} is showing no" \
-                      f" copyrights: {new['copyrights']}")
+                print(f"WARN: New file {fname} is showing no copyrights: {new['copyrights']}")
             else:
-                print(f"INFO: New file {fname} is showing" \
-                      f" copyrights: {new['copyrights']}")
+                print(f"INFO: New file {fname} is showing copyrights: {new['copyrights']}")
             continue
         old = old_dict[fname]
         if new['copyrights'] != old['copyrights']:
-            print(f"WARN: {fname} Copyright has changed from " \
-                  f"{old['copyrights']} to {new['copyrights']}")
+            print(f"WARN: {fname} Copyright has changed from {old['copyrights']} to {new['copyrights']}")
         if new['license_expressions'] != old['license_expressions']:
-            print(f"WARN: {fname} License Expression has changed from " \
-                  f"{old['license_expressions']} to {new['license_expressions']}")
+            print(f"WARN: {fname} License Expression has changed from {old['license_expressions']} to {new['license_expressions']}")
+
+def run_scancode(directory):
+    with tempfile.NamedTemporaryFile() as tmp_base:
+        subprocess.check_call(["scancode", "-cli", "--json", tmp_base.name, 
+                              directory], stderr=subprocess.STDOUT)
+        return create_cl_dict(tmp_base.name)
+
+def scancode_git_dir(git_hash, git_dir=None):
+    with tempfile.TemporaryDirectory() as tmp_scandir:
+            subprocess.check_call(f"git archive '{git_hash}' | " +
+                                  f"tar -x -C '{tmp_scandir}'",
+                                  shell=True, cwd=git_dir)
+            return run_scancode(tmp_scandir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Create a new license json file based upon scancode \
-                        directory results.")
+        description="Create a new license json file based upon scancode directory results")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--dirs", action="store_true")
     group.add_argument("-j", "--jsons", action="store_true")
+    group.add_argument("-g", "--git", action="store_true")
+    parser.add_argument("-G", "--git_dir", type=Path)
     parser.add_argument("before")
     parser.add_argument("after")
     args = parser.parse_args()
 
-    if args.dirs:
-        with tempfile.NamedTemporaryFile() as tmp_base:
-            subprocess.run(shlex.split(f"scancode -cli --json {tmp_base.name} \
-                           {args.before}"), stderr=subprocess.STDOUT)
-            old_dict = create_cl_dict(tmp_base.name)
-        with tempfile.NamedTemporaryFile() as tmp_new:
-            subprocess.run(shlex.split(f"scancode -cli --json {tmp_new.name} \
-                           {args.after}"), stderr=subprocess.STDOUT)
-            new_dict = create_cl_dict(tmp_new.name)
-    elif args.jsons:
-        old_dict = create_cl_dict(args.before)
-        new_dict = create_cl_dict(args.after)
+    try:
+        if args.dirs:
+            old_dict = run_scancode(args.before)
+            new_dict = run_scancode(args.after)
+        elif args.jsons:
+            old_dict = create_cl_dict(args.before)
+            new_dict = create_cl_dict(args.after)
+        elif args.git:
+            old_dict = scancode_git_dir(args.before, args.git_dir)
+            new_dict = scancode_git_dir(args.after, args.git_dir)
 
-    report_differences(old_dict, new_dict)
+        report_differences(old_dict, new_dict)
+    except (subprocess.SubprocessError, 
+            FileNotFoundError) as e:
+        print(e)
