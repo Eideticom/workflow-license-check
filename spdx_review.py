@@ -6,7 +6,6 @@
 import argparse
 import json
 import subprocess
-import shlex
 from pathlib import Path
 import tempfile
 
@@ -67,8 +66,8 @@ def report_differences(old_dict, new_dict):
 
 def run_scancode(directory):
     with tempfile.NamedTemporaryFile() as tmp_base:
-        subprocess.run(shlex.split(f"scancode -cli --json {tmp_base.name} \
-                       {directory}"), stderr=subprocess.STDOUT)
+        subprocess.check_call(["scancode", "-cli", "--json", tmp_base.name, 
+                              directory], stderr=subprocess.STDOUT)
         return create_cl_dict(tmp_base.name)
 
 if __name__ == "__main__":
@@ -82,11 +81,16 @@ if __name__ == "__main__":
     parser.add_argument("after")
     args = parser.parse_args()
 
-    if args.dirs:
-        old_dict = run_scancode(args.before)
-        new_dict = run_scancode(args.after)
-    elif args.jsons:
-        old_dict = create_cl_dict(args.before)
-        new_dict = create_cl_dict(args.after)
+    try:
+        if args.dirs:
+            old_dict = run_scancode(args.before)
+            new_dict = run_scancode(args.after)
+        elif args.jsons:
+            old_dict = create_cl_dict(args.before)
+            new_dict = create_cl_dict(args.after)
 
-    report_differences(old_dict, new_dict)
+        report_differences(old_dict, new_dict)
+    except (subprocess.SubprocessError, 
+            FileNotFoundError) as e:
+        print(e)
+
