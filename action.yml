@@ -1,0 +1,6 @@
+# action.yml
+name: 'Create docker container for scancode environment'
+description: 'action.yml file'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
