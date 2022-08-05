@@ -8,6 +8,7 @@ import json
 import subprocess
 from pathlib import Path
 import tempfile
+import sys
 
 
 def mk_copyright_list(dic):
@@ -39,6 +40,7 @@ def create_cl_dict(json_file):
     return final_dict
 
 def report_differences(old_dict, new_dict):
+    error_flag = False
     for fname, new in new_dict.items():
         if fname not in old_dict:
             print(f"INFO: New file: {fname} detected. Checking now for license expressions and copyrights")
@@ -47,15 +49,21 @@ def report_differences(old_dict, new_dict):
             else:
                 print(f"INFO: New file {fname} is showing license_expressions: {new['license_expressions']}")
             if not new['copyrights']:
-                print(f"WARN: New file {fname} is showing no copyrights: {new['copyrights']}")
+                print(f"ERROR: New file {fname} is showing no copyrights: {new['copyrights']}")
+                error_flag = True
             else:
                 print(f"INFO: New file {fname} is showing copyrights: {new['copyrights']}")
             continue
         old = old_dict[fname]
         if new['copyrights'] != old['copyrights']:
-            print(f"WARN: {fname} Copyright has changed from {old['copyrights']} to {new['copyrights']}")
+            if not new['copyrights']:
+                print(f"ERROR: {fname} is showing no copyrights: {new['copyrights']}")
+                error_flag = True
+            else:
+                print(f"WARN: {fname} Copyright has changed from {old['copyrights']} to {new['copyrights']}")
         if new['license_expressions'] != old['license_expressions']:
             print(f"WARN: {fname} License Expression has changed from {old['license_expressions']} to {new['license_expressions']}")
+    return error_flag
 
 def run_scancode(directory):
     with tempfile.NamedTemporaryFile() as tmp_base:
@@ -93,7 +101,8 @@ if __name__ == "__main__":
             old_dict = scancode_git_dir(args.before, args.git_dir)
             new_dict = scancode_git_dir(args.after, args.git_dir)
 
-        report_differences(old_dict, new_dict)
+        error_flag = report_differences(old_dict, new_dict)
+        sys.exit(error_flag)
     except (subprocess.SubprocessError, 
             FileNotFoundError) as e:
         print(e)
