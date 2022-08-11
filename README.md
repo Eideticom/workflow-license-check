@@ -114,3 +114,27 @@ WARN: Diff in file: old_files/none_to_added_cr.sh field: copyrights old: [] new:
 # An existing file is renamed
 WARN: Diff in file: old_files/no_lic_no_cr.c field: file_name old: old_files/no_lic_no_cr.c new: old_files/new_file_w_cr.h
 ```
+# Action Setup Guide
+
+Pull Request
+
+You can automatically review the license and copyrights for the pull requests
+of your projects. Add the following file to your project:
+
+.github/workflows/spdx-workflow-call.yml
+
+```
+name: Call the workflow-license-check reusable workflow
+on: [pull_request]
+jobs:
+  call-workflow:
+    runs-on: ubuntu-latest
+    name: SPDX License and Copyright Check
+    steps:
+      - name: Checkout the working branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Check the licenses and copyrights
+        uses: Eideticom/workflow-license-check@main
+```

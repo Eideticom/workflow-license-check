@@ -1,0 +1,14 @@
+name: Call the workflow-license-check reusable workflow
+on: [pull_request]
+jobs:
+  call-workflow:
+    runs-on: ubuntu-latest
+    name: SPDX License and Copyright Check
+    steps:
+      - name: Checkout the working branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Check the licenses and copyrights
+        uses: Eideticom/workflow-license-check@main
+
