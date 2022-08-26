@@ -75,7 +75,7 @@ def report_differences(old_dict, new_dict):
 
 def run_scancode(directory):
     with tempfile.NamedTemporaryFile() as tmp_base:
-        subprocess.check_call(["scancode", "-cli", "--json", tmp_base.name, 
+        subprocess.check_call(["scancode", "--quiet", "-cli", "--json", tmp_base.name, 
                               directory], stderr=subprocess.STDOUT)
         return create_cl_dict(tmp_base.name)
 
