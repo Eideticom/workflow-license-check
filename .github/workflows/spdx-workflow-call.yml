@@ -11,4 +11,6 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Check the licenses and copyrights
         uses: Eideticom/workflow-license-check@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
