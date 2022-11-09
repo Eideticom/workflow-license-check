@@ -30,7 +30,7 @@ def create_cl_dict(json_file):
         data = json.load(f)
     final_dict = {}
     for dic in data['files']:
-        if "type" in dic or dic['type'] == "file":
+        if "type" in dic and dic['type'] == "file":
             tmp_dict = {}
             tmp_dict['file_type']           = dic['file_type']
             tmp_dict['license_expressions'] = dic['license_expressions']
