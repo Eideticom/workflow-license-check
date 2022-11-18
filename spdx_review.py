@@ -90,7 +90,11 @@ if __name__ == "__main__":
     group.add_argument("-j", "--jsons", action="store_true")
     group.add_argument("-g", "--git", action="store_true")
     parser.add_argument("-G", "--git_dir", type=Path)
-    parser.add_argument("-l", "--log", default="WARN", choices=["INFO", "WARN", "ERROR"])
+    parser.add_argument("-l", "--log", type=argparse.FileType("w"),
+                        help="log messages to a file")
+    parser.add_argument("-L", "--log-level",
+                        default="WARN", choices=["INFO", "WARN", "ERROR"],
+                        help="level to log to file")
     parser.add_argument("before")
     parser.add_argument("after")
     args = parser.parse_args()
@@ -102,10 +106,11 @@ if __name__ == "__main__":
     root.addHandler(strmhdlr)
     root.setLevel(logging.INFO)
 
-    filehdlr = logging.FileHandler('spdx_review.log', 'w')
-    filehdlr.setLevel(getattr(logging, args.log.upper(), None))
-    filehdlr.setFormatter(fmt)
-    root.addHandler(filehdlr)
+    if args.log:
+        filehdlr = logging.StreamHandler(args.log)
+        filehdlr.setLevel(getattr(logging, args.log_level.upper(), None))
+        filehdlr.setFormatter(fmt)
+        root.addHandler(filehdlr)
 
     try:
         if args.dirs:

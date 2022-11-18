@@ -26,13 +26,14 @@ BODY_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PRNUM}/comm
 git fetch --no-tags --progress --no-recurse-submodules \
 	--depth=1 origin "$GITHUB_BASE_REF"
 
-REVIEW_ARGS=(-g "origin/$GITHUB_BASE_REF" "origin/$GITHUB_HEAD_REF")
+LOG="spdx_review.log"
+REVIEW_ARGS=(-l "$LOG" -g "origin/$GITHUB_BASE_REF" "origin/$GITHUB_HEAD_REF")
 
 echo "Run spdx_review.py" "${REVIEW_ARGS[@]}"
 python3 /spdx_review.py "${REVIEW_ARGS[@]}" || true
 
-if [[ -s "spdx_review.log" ]]; then
-    SPDX_RESULT=$(cat spdx_review.log)
+if [[ -s "$LOG" ]]; then
+    SPDX_RESULT=$(cat "$LOG")
     fmt_body="{ \"body\": \"${SPDX_RESULT//$'\n'/\\n}\" }"
 
     curl "${BODY_URL}" -s \
