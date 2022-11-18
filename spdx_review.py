@@ -45,7 +45,11 @@ def report_differences(old_dict, new_dict):
         if fname not in old_dict:
             print(f"INFO: New file: {fname} detected. Checking now for license expressions and copyrights")
             logging.info(f"INFO: New file: {fname} detected. Checking now for license expressions and copyrights")
-            if not new['license_expressions']:
+
+            eid_cpy = any("eidetic" in cpyr.lower()
+                          for cpyr in new['copyrights'])
+
+            if not eid_cpy and not new['license_expressions']:
                 print(f"WARN: New file {fname} is showing no license_expressions: {new['license_expressions']}")
                 logging.warning(f"New file {fname} is showing no license_expressions: {new['license_expressions']}")
             else:
