@@ -1,3 +1,5 @@
+# SPDX-License-Identifer: Apache-2.0
+# Copyright (c) 2022, Eidetic Communications Inc.
 name: Call the workflow-license-check reusable workflow
 on: [pull_request]
 jobs:

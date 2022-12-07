@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifer: Apache-2.0
+# Copyright (c) 2022, Eidetic Communications Inc.
 
 set -e
 
