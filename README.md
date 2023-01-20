@@ -67,7 +67,7 @@ $ python3 spdx_review.py -d base_project_dir new_project_dir
 # When you have two existing scancode json files
 $ python3 spdx_review.py -j basedir.json newdir.json
 # When you have two branches for a project
-$ python3 spdx_review.py -g -G libnoload6 before_branch master_branch
+$ python3 spdx_review.py -g -G base_project_dir before_branch master_branch
 ```
 This will produce stdout messages reporting any differences with licenses or
 copyrights. It will also report when a new file has been added along with those
