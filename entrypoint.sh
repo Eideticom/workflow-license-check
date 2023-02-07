@@ -25,6 +25,8 @@ PRNUM=${PR%"/merge"}
 # Github REST API endpoints
 BODY_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PRNUM}/comments"
 
+git config --global --add safe.directory $(pwd)
+
 git fetch --no-tags --progress --no-recurse-submodules \
 	--depth=1 origin "$GITHUB_BASE_REF"
 
