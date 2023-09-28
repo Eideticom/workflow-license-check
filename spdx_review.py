@@ -10,6 +10,7 @@ from pathlib import Path
 import tempfile
 import logging
 import sys
+import traceback
 
 def mk_copyright_list(dic):
     copyright_list = []
@@ -128,3 +129,6 @@ if __name__ == "__main__":
     except (subprocess.SubprocessError,
             FileNotFoundError) as e:
         print(e)
+    except Exception as e:
+        traceback.print_exc()
+        sys.exit(3)
