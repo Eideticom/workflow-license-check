@@ -10,6 +10,7 @@ from pathlib import Path
 import tempfile
 import logging
 import sys
+import traceback
 
 def mk_copyright_list(dic):
     copyright_list = []
@@ -33,7 +34,8 @@ def create_cl_dict(json_file):
         if "type" in dic and dic['type'] == "file":
             tmp_dict = {}
             tmp_dict['file_type']           = dic['file_type']
-            tmp_dict['license_expressions'] = dic['license_expressions']
+            tmp_dict['detected_license_expression'] = \
+                    dic['detected_license_expression']
             tmp_dict['copyrights']          = mk_copyright_list(dic)
             fpath = strip_directory(dic['path'])
             final_dict[fpath] = tmp_dict
@@ -48,10 +50,10 @@ def report_differences(old_dict, new_dict):
             eid_cpy = any("eidetic" in cpyr.lower()
                           for cpyr in new['copyrights'])
 
-            if not eid_cpy and not new['license_expressions']:
-                logging.warning(f"New file {fname} is showing no license_expressions: {new['license_expressions']}")
+            if not eid_cpy and not new['detected_license_expression']:
+                logging.warning(f"New file {fname} is showing no license: {new['detected_license_expression']}")
             else:
-                logging.info(f"INFO: New file {fname} is showing license_expressions: {new['license_expressions']}")
+                logging.info(f"INFO: New file {fname} is showing license_expressions: {new['detected_license_expression']}")
             if not new['copyrights']:
                 error_flag = True
                 logging.error(f"New file {fname} is showing no copyrights: {new['copyrights']}")
@@ -65,8 +67,8 @@ def report_differences(old_dict, new_dict):
                 logging.error(f"{fname} is showing no copyrights: {new['copyrights']}")
             else:
                 logging.warning(f"{fname} Copyright has changed from {old['copyrights']} to {new['copyrights']}")
-        if new['license_expressions'] != old['license_expressions']:
-            logging.warning(f"{fname} License Expression has changed from {old['license_expressions']} to {new['license_expressions']}")
+        if new['detected_license_expression'] != old['detected_license_expression']:
+            logging.warning(f"{fname} License Expression has changed from {old['detected_license_expression']} to {new['detected_license_expression']}")
     return error_flag
 
 def run_scancode(directory):
@@ -128,3 +130,6 @@ if __name__ == "__main__":
     except (subprocess.SubprocessError,
             FileNotFoundError) as e:
         print(e)
+    except Exception as e:
+        traceback.print_exc()
+        sys.exit(3)

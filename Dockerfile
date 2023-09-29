@@ -6,7 +6,7 @@ RUN apt-get install -y bzip2 xz-utils zlib1g libxml2-dev libxslt1-dev python3-pi
 
 RUN pip install --upgrade pip setuptools wheel
 
-RUN pip install scancode-toolkit
+RUN pip install scancode-toolkit==32.0.7
 
 COPY spdx_review.py /spdx_review.py
 

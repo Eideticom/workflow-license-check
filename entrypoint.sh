@@ -34,7 +34,11 @@ LOG="spdx_review.log"
 REVIEW_ARGS=(-l "$LOG" -g "origin/$GITHUB_BASE_REF" "origin/$GITHUB_HEAD_REF")
 
 echo "Run spdx_review.py" "${REVIEW_ARGS[@]}"
-python3 /spdx_review.py "${REVIEW_ARGS[@]}" || true
+python3 /spdx_review.py "${REVIEW_ARGS[@]}" || EXIT_CODE=$?
+if [ "$EXIT_CODE" != "" -a "$EXIT_CODE" != 1 ]; then
+	echo "FAILURE ($EXIT_CODE)"
+	exit 1
+fi
 
 if [[ -s "$LOG" ]]; then
     SPDX_RESULT=$(cat "$LOG")
